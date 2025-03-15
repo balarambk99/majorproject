@@ -53,17 +53,8 @@ const register = async (req, res) => {
     const existingCandidate = await Candidate.findOne({ voterid });
     if (existingCandidate) return res.status(400).json({ error: "Voter ID already registered" });
 
-    const otp = generateOTP();
-    // Save OTP in MongoDB (upsert: create new or update existing)
-    await OTP.findOneAndUpdate(
-      { email },
-      { otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
-      { upsert: true, new: true }
-    );
-
-    const sent = await sendOTP(email, otp);
-    if (!sent) return res.status(500).json({ error: "Failed to send OTP" });
-
+   // const otp = generateOTP();
+    //
     // Hash password and create candidate
     const hashedPassword = await bcrypt.hash(pass, 10);
     const candidate = new Candidate({
@@ -130,27 +121,18 @@ const verifyOTP = async (req, res) => {
 // Login User (Step 1)
 const login = async (req, res) => {
   try {
+    console.log(req.body)
     const { email, password } = req.body;
     const candidate = await Candidate.findOne({ email });
     if (!candidate || !(await bcrypt.compare(password, candidate.password))) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const otp = generateOTP();
-    // Save OTP in MongoDB (upsert: create new or update existing)
-    await OTP.findOneAndUpdate(
-      { email },
-      { otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
-      { upsert: true, new: true }
-    );
-
-    const sent = await sendOTP(email, otp);
-    if (!sent) return res.status(500).json({ error: "Failed to send OTP" });
-
+    const token = generateToken(candidate.email);
     return res.status(200).json({
       success: true,
-      message: "OTP sent to email for verification.",
-      email,
+      token,
+      voterObject:{token,voterid:candidate.voterid}
     });
   } catch (error) {
     console.error("Login error:", error);
