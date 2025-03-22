@@ -8,15 +8,16 @@ const authenticateToken =async (req, res, next) => {
     const token = authHeader && authHeader.split(" ")[1];
     console.log("wellocome to auth")
     const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-    console.log('Full URL:', fullUrl);
+    //console.log('Full URL:', fullUrl);
 
-    //console.log(token)
+    console.log(token)
     if (!token) {
         return res.status(401).json({ message: "Access Denied: No Token Provided" });
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
+            console.log("ve")
             return res.status(403).json({ message: "Invalid or Expired Token" });
         }
         req.user = user;

@@ -17,11 +17,34 @@ const CandidateSchema = new mongoose.Schema(
             required: [true, "Party name is required"], 
             trim: true
         },
+       
+        state: { 
+            type: String, 
+            required: [true, "State is required"],
+            trim: true
+        },
+        city: { 
+            type: String, 
+            required: [true, "City is required"],
+            trim: true
+        },
+        constituency: { 
+            type: String, 
+            required: [true, "Constituency is required"],
+            trim: true
+        },
+        voterId: { 
+            type: String, 
+            required: [true, "Voter ID is required"],
+            unique: true,
+            trim: true
+        },
         bio: { 
             type: String, 
             required: [true, "Bio is required"], 
             maxlength: [500, "Bio cannot exceed 500 characters"]
         },
+        
         image: { 
             type: String, 
             required: [true, "Candidate image is required"] 
@@ -29,11 +52,12 @@ const CandidateSchema = new mongoose.Schema(
         symbol: { 
             type: String, 
             required: [true, "Party symbol is required"] 
-        },  votes: { 
+        },  
+        votes: { 
             type: Number, 
             default: 0, 
             min: 0 
-        } 
+        }
     }, 
     { timestamps: true }
 );

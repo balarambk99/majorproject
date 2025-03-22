@@ -87,9 +87,11 @@ const register = async (req, res) => {
 const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
+    console.log(email,otp);
     if (!email || !otp) return res.status(400).json({ error: "Email and OTP are required" });
 
     const otpRecord = await OTP.findOne({ email });
+    console.log(otpRecord)
     if (!otpRecord) return res.status(400).json({ error: "OTP expired or not found. Request a new one." });
 
     // Check if OTP has expired
@@ -103,14 +105,14 @@ const verifyOTP = async (req, res) => {
     // OTP verified; remove the OTP document
     await OTP.deleteOne({ email });
 
-    const user = await Candidate.findOne({ email });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    // const user = await Candidate.findOne({ email });
+    // if (!user) return res.status(404).json({ error: "User not found" });
 
     return res.status(200).json({
       success: true,
       message: "OTP verified successfully",
-      token: generateToken(user._id),
-      data: user,
+     // token: generateToken(user._id),
+      
     });
   } catch (error) {
     console.error("OTP verification error:", error);
@@ -146,10 +148,16 @@ const sendOtpController = async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: "Email is required" });
 
+    const existingOtp = await OTP.findOne({ email });
+
+    if (existingOtp && existingOtp.expiresAt > Date.now()) {
+      return res.status(400).json({ error: "OTP is still valid. Please use the existing OTP." });
+    }
+
     const otp = generateOTP();
-    await OTP.findOneAndUpdate(
+    const updatedOtp = await OTP.findOneAndUpdate(
       { email },
-      { otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
+      { otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) }, // 5 minutes expiry
       { upsert: true, new: true }
     );
 
@@ -162,5 +170,6 @@ const sendOtpController = async (req, res) => {
     return res.status(500).json({ error: "Server error", details: error.message });
   }
 };
+
 
 module.exports = { register, verifyOTP, sendOtpController, login };

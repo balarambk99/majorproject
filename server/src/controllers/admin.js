@@ -32,33 +32,49 @@ const createCandidate = async (req, res) => {
         //console.log("Files received:", req.files); // Debugging logs
 
         // Extract form data
-        const { fullName, age, party, bio, image, symbol } = req.body;
-
+        //console.log(req.body);
+        //console.log("Files received:", req.files);
+        
+        // Extract form data
+        const { 
+            fullName, age, party, 
+            state, city, constituency, voterId, bio,  
+            image, symbol 
+        } = req.body;
+        
         // Validate required fields
-        if (!fullName || !age || !party || !bio || !image || !symbol) {
+        if (!fullName || !age || !party || !state || !city || !constituency || !voterId || !bio  || !image || !symbol) {
             return res.status(400).json({ success: false, message: "All fields are required." });
         }
-
+        
         // Validate age (must be a number and >= 18)
         const parsedAge = parseInt(age);
         if (isNaN(parsedAge) || parsedAge < 18) {
-            console.log("failde")
+            console.log("Failed: Invalid age");
             return res.status(400).json({ success: false, message: "Invalid age. Must be a number and at least 18." });
         }
-
+        
         // Create and save candidate
         const newCandidate = new Candidate({
             fullName,
             age: parsedAge, // Ensure it's stored as a number
             party,
+           
+          
+         
+            state,
+            city,
+            constituency,
+            voterId,
             bio,
+           
             image,
             symbol,
             votes: 0
         });
-
+        console.log("sucessf")
         await newCandidate.save();
-         console.log("sucess");
+        console.log("Success: Candidate created");
         return res.status(201).json({
             success: true,
             message: "Candidate created successfully!",

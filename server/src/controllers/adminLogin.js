@@ -11,7 +11,7 @@ const adminLogin = async (req, res) => {
         console.log("adimin",req.body);
         const admin = await Admin.findOne({email: username });
         if (!admin) {
-            console.log("sucess admin")
+            console.log("sucess admin faile")
             return res.status(400).json({ message: "Admin not found" });
         }
 
@@ -32,7 +32,7 @@ const adminLogin = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
-           console.log("sucess")
+           console.log("sucess",token)
         res.json({ success: "Login successful", token, admin });
     } catch (error) {
         console.error("Login error:", error);
